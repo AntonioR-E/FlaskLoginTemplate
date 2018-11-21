@@ -7,11 +7,37 @@ from user.forms import RegisterForm
 
 user_app = Blueprint('user_app', __name__)
 
+@user_app.route('/logout')
+def logout():
+	if'username' in session:
+		session.pop('username', None)
+		return redirect(url_for('index'))
+	return 'You are not logged in'
 
 @user_app.route('/login')
 def login():
-    return 'login user'
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.objects.filter(
+            username=form.username.data
+            ).first()
+        if user:
+    		 if bcrypt.hashpw(form.password.data, user.password) == user.password:
+                 session['username'] = form.username.data# set the session variables
+                 session['roles'] = user.roles
+                 if user.active == False:
+                    session.pop('username', None)
+     				return "Your requested account is still under review <a href='index'> Home <a>"
 
+    			if(login_user['roles']=='admin'):
+    				return redirect(url_for('admin'))
+    			return redirect(url_for('index'))
+
+            else:
+                user = None
+        if not user:
+            error = 'Incorrect credentials'
+    return render_template('user/login.html', form=form, error=error)
 @user_app.route('/register', methods=('GET','POST'))
 def register():
     form = RegisterForm()

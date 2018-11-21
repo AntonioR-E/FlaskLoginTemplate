@@ -6,6 +6,15 @@ from  wtforms.validators import ValidationError
 
 from user.models import User
 
+class LoginForm(Form):
+    username = StringField('Username', [
+        validators.DataRequired(),
+        validators.length(min=4, max=25)
+        ])
+    password = PasswordField('Password', [
+        validators.DataRequired(),
+        validators.length(min=4, max=80)
+        ])
 
 class RegisterForm(Form):
     first_name = StringField('First Name',[validators.DataRequired()])

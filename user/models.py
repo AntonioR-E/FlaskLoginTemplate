@@ -12,6 +12,8 @@ class User(db.Document):
     last_name = db.StringField(db_field="ln", max_length=50)
     created = db.IntField(db_field="c", default=now())
     bio = db.StringField(db_field="b", max_length=50)
+    roles = db.StringField(db_field="r", max_length=15)
+    active = db.BooleanField(db_field='a', default=False)
 
     meta = {
         'indexes': ['username', 'email', '-created']
