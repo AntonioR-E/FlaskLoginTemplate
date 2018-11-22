@@ -34,7 +34,7 @@ def login():
                 session['role'] = user.role
                 if not user.active:
                     session.pop('username', None)
-                    return "Your requested account is still under review <a href='index'> Home <a>"
+                    error = 'Your account is still under review'
 
                 if user.role == 'admin':
                     return redirect(url_for('admin'))
