@@ -1,12 +1,13 @@
-from flask_wtf import Form
+from flask_wtf import FlaskForm, RecaptchaField
 from wtforms import validators, StringField, PasswordField
 from wtforms.fields.html5 import EmailField
-from  wtforms.validators import ValidationError
+from wtforms.validators import ValidationError
+
 
 
 from user.models import User
 
-class LoginForm(Form):
+class LoginForm(FlaskForm):
     username = StringField('Username', [
         validators.DataRequired(),
         validators.length(min=4, max=25)
@@ -16,7 +17,7 @@ class LoginForm(Form):
         validators.length(min=4, max=80)
         ])
 
-class RegisterForm(Form):
+class RegisterForm(FlaskForm):
     first_name = StringField('First Name',[validators.DataRequired()])
     last_name = StringField('Last Name', [validators.DataRequired()])
     email = EmailField('Email Address', [
@@ -34,6 +35,7 @@ class RegisterForm(Form):
         validators.length(min=8,max=30)
     ])
     confirm = PasswordField('Repeat Password')
+    # recaptcha = RecaptchaField()
 
     def validate_username(form, field):
         if User.objects.filter(username=field.data).first():
