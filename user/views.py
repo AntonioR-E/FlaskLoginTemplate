@@ -7,7 +7,9 @@ from user.forms import RegisterForm, LoginForm
 
 user_app = Blueprint('user_app', __name__)
 
-
+@user_app.route('/')
+def index():
+    return render_template('/index')
 @user_app.route('/logout')
 def logout():
     if 'username' in session:
@@ -34,12 +36,12 @@ def login():
                 session['role'] = user.role
                 if not user.active:
                     session.pop('username', None)
-                    return "Your requested account is still under review <a href='index'> Home <a>"
+                    error = 'Your account is still under review'
 
                 if user.role == 'admin':
                     return redirect(url_for('admin'))
 
-                return redirect(url_for('index'))
+                #return redirect(url_for('index'))
 
             else:
                 user = None
@@ -66,3 +68,42 @@ def register():
         user.save()
         return "User register"
     return render_template('user/register.html', form=form)
+
+
+@user_app.route('/upload', methods=['GET', 'POST'])
+def upload_file():
+	if request.method == 'POST':
+		print("Inside Post")
+		# check if the post request has the file part
+		if 'file' not in request.files:
+			print("File not in request.files")
+			return redirect(request.url)
+		file = request.files['file']
+		# if user does not select file, browser also
+        # submit an empty part without filename
+		if file.filename == '':
+			print("NO FILE")
+			return redirect(request.url)
+		if file:
+			filename = secure_filename(file.filename)
+			temp = helpers.upload_file_to_s3(file, "labs.eurekalabs.net")
+			return redirect(url_for('index', filename=str(temp)))
+	return render_template("addlab.html")
+
+
+
+
+@user_app.route('/users', methods=['GET'])
+def get_all_users():
+	if 'username' in session:
+		db_users = mongo.db.user.find();
+		if(session['roles']=='admin'):
+			return render_template('users.html', db_users = db_users)
+	return "You do not have permission for this page"
+
+@user_app.route('/delete/<ObjectId:userid>', methods=['GET'])
+def delete_user(userid):
+	user = mongo.db.user
+	delete_this = user.find_one_or_404({'_id': userid})
+	user.remove(delete_this)
+	return 'removed'
