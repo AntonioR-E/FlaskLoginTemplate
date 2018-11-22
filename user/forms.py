@@ -35,7 +35,7 @@ class RegisterForm(FlaskForm):
         validators.length(min=8,max=30)
     ])
     confirm = PasswordField('Repeat Password')
-    # recaptcha = RecaptchaField()
+    recaptcha = RecaptchaField()
 
     def validate_username(form, field):
         if User.objects.filter(username=field.data).first():
